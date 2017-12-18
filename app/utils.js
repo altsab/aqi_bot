@@ -13,13 +13,21 @@ const req = () => new Promise((resolve, reject) => {
 });
 
 const getAllData = async () => {
-  const body = await req();
+  const body = await req()
+    .catch((err) => {
+      console.log(err);
+      return err;
+    });
   const regExp = /sensors_data = ([\s\S]*?)<\/script>/;
   return JSON.parse(body.match(regExp)[1]);
 };
 
 const getAstData = async () => {
-  const body = await req();
+  const body = await req()
+    .catch((err) => {
+      console.log(err);
+      return err;
+    });
   const regExp = /sensors_data = ([\s\S]*?)<\/script>/;
   const json = JSON.parse(body.match(regExp)[1]);
   const astData = json.filter(obj => obj.city === 'Астана');
@@ -32,7 +40,11 @@ const getAstData = async () => {
 };
 
 const getAlmData = async () => {
-  const body = await req();
+  const body = await req()
+    .catch((err) => {
+      console.log(err);
+      return err;
+    });
   const regExp = /sensors_data = ([\s\S]*?)<\/script>/;
   const json = JSON.parse(body.match(regExp)[1]);
   const astData = json.filter(obj => obj.city === 'Алматы');
@@ -45,7 +57,11 @@ const getAlmData = async () => {
 };
 
 const getKrgData = async () => {
-  const body = await req();
+  const body = await req()
+    .catch((err) => {
+      console.log(err);
+      return err;
+    });
   const regExp = /sensors_data = ([\s\S]*?)<\/script>/;
   const json = JSON.parse(body.match(regExp)[1]);
   const astData = json.filter(obj => obj.city === 'Караганда');
@@ -58,7 +74,11 @@ const getKrgData = async () => {
 };
 
 const getTmrtData = async () => {
-  const body = await req();
+  const body = await req()
+    .catch((err) => {
+      console.log(err);
+      return err;
+    });
   const regExp = /sensors_data = ([\s\S]*?)<\/script>/;
   const json = JSON.parse(body.match(regExp)[1]);
   const astData = json.filter(obj => obj.city === 'Темиртау');
@@ -70,8 +90,24 @@ const getTmrtData = async () => {
   }));
 };
 
+const beautifyData = json => json.reduce((acc, obj) => {
+  const {
+    name, pm10, pm25, date,
+  } = obj;
+  const markdownString =
+  `
+*Район*: ${name}
+*pm10*: ${pm10 === '-1' ? 'Данные недоступны' : pm10}
+*pm2.5*: ${pm25 === '-1' ? 'Данные недоступны' : pm25}
+*Дата проверки*: ${date}
+  `;
+  console.log(markdownString);
+  return acc + markdownString;
+}, '');
+
 module.exports = {
   stringify,
+  beautifyData,
   getAllData,
   getAstData,
   getAlmData,

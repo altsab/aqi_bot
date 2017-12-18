@@ -2,6 +2,7 @@ const TelegramBot = require('node-telegram-bot-api');
 const config = require('config');
 const {
   stringify,
+  beautifyData,
   getAllData,
   getAlmData,
   getAstData,
@@ -22,10 +23,31 @@ const bot = new TelegramBot(TOKEN, {
 
 bot.onText(/\/debug (.+)/, (msg, [source, match]) => {
   const { id } = msg.chat;
-  console.log('Sending debug message');
   bot.sendMessage(id, stringify(msg), {
     disable_notification: true,
   });
+});
+
+bot.onText(/\/help/, (msg, [source, match]) => {
+  const { id } = msg.chat;
+  bot.sendMessage(id, 'Для обратной связи стучаться сюда: @altsab', {
+    disable_notification: false,
+  });
+});
+
+bot.onText(/\/aqinfo/, (msg, [source, match]) => {
+  const { id } = msg.chat;
+  bot.sendMessage(
+    id,
+    `
+[Что такое AQI? short](http://telegra.ph/CHto-takoe-AQI-12-18)
+[Что такое AQI? long](http://auagroup.kz/almaty-air/pokazateli-kachestva-vozdukha-iza.html)
+[О частицах pm2.5 и почему они вредны для вас](https://airkaz.org/pm25.php)`,
+    {
+      disable_notification: false,
+      parse_mode: 'Markdown',
+    },
+  );
 });
 
 bot.onText(/\/start/, (msg) => {
@@ -35,9 +57,8 @@ bot.onText(/\/start/, (msg) => {
       keyboard: [
         ['Astana', 'Almaty'],
         ['Karaganda', 'Temirtau'],
-        ['Close'],
+        ['Close', 'About'],
       ],
-      one_time_keyboard: true,
     },
   });
 });
@@ -47,27 +68,64 @@ bot.on('message', (msg) => {
   const receivedMessage = msg.text;
   switch (receivedMessage) {
     case 'Astana':
-      bot.sendMessage(chatId, 'Results for Astana');
+      getAstData()
+        .then(data => bot.sendMessage(chatId, beautifyData(data), { parse_mode: 'Markdown' }))
+        .catch((err) => {
+          console.error(err);
+          bot.sendMessage(chatId, 'Error occured while fetching results');
+        });
       break;
     case 'Almaty':
-      bot.sendMessage(chatId, 'Results for Almaty');
+      getAlmData()
+        .then(data => bot.sendMessage(chatId, beautifyData(data), { parse_mode: 'Markdown' }))
+        .catch((err) => {
+          console.error(err);
+          bot.sendMessage(chatId, 'Error occured while fetching results');
+        });
       break;
     case 'Karaganda':
-      bot.sendMessage(chatId, 'Results for Karaganda');
+      getKrgData()
+        .then(data => bot.sendMessage(chatId, beautifyData(data), { parse_mode: 'Markdown' }))
+        .catch((err) => {
+          console.error(err);
+          bot.sendMessage(chatId, 'Error occured while fetching results');
+        });
       break;
     case 'Temirtau':
-      bot.sendMessage(chatId, 'Results for Temirtau');
+      getTmrtData()
+        .then(data => bot.sendMessage(chatId, beautifyData(data), { parse_mode: 'Markdown' }))
+        .catch((err) => {
+          console.error(err);
+          bot.sendMessage(chatId, 'Error occured while fetching results');
+        });
       break;
     case 'Close':
-      bot.sendMessage(chatId, 'Closing keyboard', {
+      bot.sendMessage(chatId, 'Keyboard closed', {
         reply_markup: {
           remove_keyboard: true,
         },
+        disable_notification: true,
       });
       break;
-    case '/start':
+    case 'About':
+      bot.sendMessage(
+        chatId,
+        `
+[Что такое AQI? short](http://telegra.ph/CHto-takoe-AQI-12-18)
+[Что такое AQI? long](http://auagroup.kz/almaty-air/pokazateli-kachestva-vozdukha-iza.html)
+[О частицах pm2.5 и почему они вредны для вас](https://airkaz.org/pm25.php)`,
+        {
+          disable_notification: false,
+          parse_mode: 'Markdown',
+        },
+      );
       break;
     default:
-      bot.sendMessage(chatId, 'No such city in database');
+      break;
   }
+});
+
+bot.on('callback_query', (query) => {
+  // bot.sendMessage(query.message.chat.id, stringify(query));
+  bot.answerCallbackQuery(query.id, query.data);
 });
