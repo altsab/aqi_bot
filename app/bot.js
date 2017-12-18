@@ -1,6 +1,13 @@
 const TelegramBot = require('node-telegram-bot-api');
 const config = require('config');
-const utils = require('./utils');
+const {
+  stringify,
+  getAllData,
+  getAlmData,
+  getAstData,
+  getKrgData,
+  getTmrtData,
+} = require('./utils');
 
 const TOKEN = config.get('bot.token');
 const bot = new TelegramBot(TOKEN, {
@@ -16,7 +23,7 @@ const bot = new TelegramBot(TOKEN, {
 bot.onText(/\/debug (.+)/, (msg, [source, match]) => {
   const { id } = msg.chat;
   console.log('Sending debug message');
-  bot.sendMessage(id, utils.debug(msg), {
+  bot.sendMessage(id, stringify(msg), {
     disable_notification: true,
   });
 });
