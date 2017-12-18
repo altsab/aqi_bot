@@ -101,7 +101,6 @@ const beautifyData = json => json.reduce((acc, obj) => {
 *pm2.5*: ${pm25 === '-1' ? 'Данные недоступны' : pm25}
 *Дата проверки*: ${date}
   `;
-  console.log(markdownString);
   return acc + markdownString;
 }, '');
 
