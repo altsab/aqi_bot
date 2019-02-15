@@ -7,8 +7,6 @@ const {
   getCityData,
 } = require('./utils');
 
-const getMap = require("./map.js")
-
 const TOKEN = config.get('bot.token');
 const bot = new TelegramBot(TOKEN, {
   polling: {
