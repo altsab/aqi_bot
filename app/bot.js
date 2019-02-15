@@ -1,14 +1,13 @@
 const TelegramBot = require('node-telegram-bot-api');
+process.env.NODE_ENV = "production";
 const config = require('config');
 const {
   stringify,
   beautifyData,
-  getAllData,
-  getAlmData,
-  getAstData,
-  getKrgData,
-  getTmrtData,
+  getCityData,
 } = require('./utils');
+
+const getMap = require("./map.js")
 
 const TOKEN = config.get('bot.token');
 const bot = new TelegramBot(TOKEN, {
@@ -68,7 +67,7 @@ bot.on('message', (msg) => {
   const receivedMessage = msg.text;
   switch (receivedMessage) {
     case 'Astana':
-      getAstData()
+      getCityData('Астана')
         .then(data => bot.sendMessage(chatId, beautifyData(data), { parse_mode: 'Markdown' }))
         .catch((err) => {
           console.error(err);
@@ -76,29 +75,39 @@ bot.on('message', (msg) => {
         });
       break;
     case 'Almaty':
-      getAlmData()
-        .then(data => bot.sendMessage(chatId, beautifyData(data), { parse_mode: 'Markdown' }))
-        .catch((err) => {
-          console.error(err);
-          bot.sendMessage(chatId, 'Error occured while fetching results');
-        });
+      getCityData('Алматы')
+          .then(data => bot.sendMessage(chatId, beautifyData(data), { parse_mode: 'Markdown' }))
+          .catch((err) => {
+            console.error(err);
+            bot.sendMessage(chatId, 'Error occured while fetching results');
+          });
       break;
     case 'Karaganda':
-      getKrgData()
-        .then(data => bot.sendMessage(chatId, beautifyData(data), { parse_mode: 'Markdown' }))
-        .catch((err) => {
-          console.error(err);
-          bot.sendMessage(chatId, 'Error occured while fetching results');
-        });
+      getCityData('Караганда')
+          .then(data => bot.sendMessage(chatId, beautifyData(data), { parse_mode: 'Markdown' }))
+          .catch((err) => {
+            console.error(err);
+            bot.sendMessage(chatId, 'Error occured while fetching results');
+          });
       break;
     case 'Temirtau':
-      getTmrtData()
-        .then(data => bot.sendMessage(chatId, beautifyData(data), { parse_mode: 'Markdown' }))
-        .catch((err) => {
-          console.error(err);
-          bot.sendMessage(chatId, 'Error occured while fetching results');
-        });
+      getCityData('Темиртау')
+          .then(data => bot.sendMessage(chatId, beautifyData(data), { parse_mode: 'Markdown' }))
+          .catch((err) => {
+            console.error(err);
+            bot.sendMessage(chatId, 'Error occured while fetching results');
+          });
       break;
+    /*
+    case 'Map':
+      getMap()
+          .then(fileName => bot.sendPhoto(chatId, fileName))
+          .catch((err) => {
+            console.error(err);
+            bot.sendMessage(chatId, 'Error occured while fetching map');
+          });
+      break;
+    */
     case 'Close':
       bot.sendMessage(chatId, 'Keyboard closed', {
         reply_markup: {
@@ -121,6 +130,7 @@ bot.on('message', (msg) => {
       );
       break;
     default:
+      bot.sendMessage(chatId, 'WAT?!');
       break;
   }
 });

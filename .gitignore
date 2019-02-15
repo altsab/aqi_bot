@@ -1,3 +1,4 @@
 node_modules
-config/development.json
+config/
 test.js
+app/map.js
